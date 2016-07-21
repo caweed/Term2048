@@ -22,7 +22,7 @@
 #define MAGENTA 6
 
 static int colors[7] = {BLACK, RED, YELLOW, GREEN, CYAN, BLUE, MAGENTA};
-static std::string happys[] = { "(-_-)", "(T_T)", "(^_^)", "(^o^)", "(^.^)" };
+static std::string happys[] = {"(-_-)", "(T_T)", "(^_^)", "(^o^)", "(^.^)"};
 
 class Board {
  public:
@@ -182,12 +182,12 @@ void Board::draw() {
       int position = start_y + (7 - this->map_values_[value].size()) / 2;
       if (value == -1) {
         color = rand() % 7;
-        position = start_y + (7 - happys[rand()%5].size()) / 2;
+        position = start_y + (7 - happys[rand() % 5].size()) / 2;
         attron(COLOR_PAIR(color) | A_REVERSE | A_BOLD);
         mvprintw(start_x, start_y, "       ");
         mvprintw(start_x + 1, start_y, "       ");
         mvprintw(start_x + 2, start_y, "       ");
-        mvprintw(start_x + 1, position, "%s", happys[rand()%5].c_str());
+        mvprintw(start_x + 1, position, "%s", happys[rand() % 5].c_str());
         attroff(COLOR_PAIR(color) | A_REVERSE | A_BOLD);
         continue;
       }
@@ -286,7 +286,8 @@ void Board::loop() {
         break;
     }
     if (this->boards_ != before_boards) {
-      if (quit_but_result) this->save("/data/data/com.lonelyweed.term2048/files/Data", false);
+      if (quit_but_result)
+        this->save("/data/data/com.lonelyweed.term2048/files/Data", false);
       this->add();
       this->draw();
     }
