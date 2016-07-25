@@ -2,6 +2,7 @@
 #define TERM2048_BOARD_H
 
 #include <ncurses.h>
+#include <unistd.h>
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -56,6 +57,7 @@ class Board {
   void draw();
   void loop();
   void restart();
+  void set_one_more_counts(bool c) { this->one_more_counts = c; }
   void set_reversed(bool r) { this->reversed = r; }
   void set_game_same_count(int count) { this->same_count = count; }
   void set_difficult_mode(bool d) { this->difficult_mode = d; }
@@ -86,6 +88,7 @@ class Board {
     noecho();
     cbreak();
     start_color();
+    curs_set(0);
     init_pair(1, COLOR_WHITE, COLOR_RED);
     init_pair(2, COLOR_WHITE, COLOR_YELLOW);
     init_pair(3, COLOR_WHITE, COLOR_GREEN);
@@ -132,6 +135,7 @@ class Board {
  private:
   bool score_resulted;
   bool reversed;
+  bool one_more_counts;
   bool difficult_mode;
   int difficult_number;
   int difficult_mode_row, difficult_mode_col;
@@ -276,6 +280,7 @@ void Board::loop() {
         break;
       case 's':
         this->save("/data/data/com.lonelyweed.term2048/files/Data");
+        quit_but_result = true;
         break;
       case 'r':
         this->resume("/data/data/com.lonelyweed.term2048/files/Data");
@@ -286,15 +291,19 @@ void Board::loop() {
         break;
     }
     if (this->boards_ != before_boards) {
-      if (quit_but_result)
-        this->save("/data/data/com.lonelyweed.term2048/files/Data", false);
+      this->draw();
+      usleep(150000);
       this->add();
       this->draw();
+      if (quit_but_result)
+        this->save("/data/data/com.lonelyweed.term2048/files/Data", false);
     }
   game_resume:
     if (this->finished()) {
       mvprintw(0, 0, "Game Over! \'n\' to restart | \'q\' to leave");
       refresh();
+      if (quit_but_result)
+        this->save("/data/data/com.lonelyweed.term2048/files/Data", false);
       int ch;
       while ((ch = getch()) != 'q') {
         if (ch == 'n') {
@@ -310,6 +319,19 @@ void Board::restart() {
   for (auto &rows : this->boards_) {
     for (auto &col : rows) {
       col = 0;
+    }
+  }
+
+  if (this->difficult_mode) {
+    for (int i = 0; i < this->difficult_number; ++i) {
+      while (true) {
+        int row = rand() % this->size_;
+        int col = rand() % this->size_;
+        if (this->boards_[row][col] == 0) {
+          this->boards_[row][col] = -1;
+          break;
+        }
+      }
     }
   }
   this->scores = 0;
@@ -378,36 +400,42 @@ void Board::rotate_vertical() {
 }
 
 void Board::move_left() {
-  this->clear_blank();
-  for (size_type row = 0; row < this->size_; ++row) {
-    for (size_type col = 0; col < this->size_ - (this->same_count - 1); ++col) {
-      bool still_same = true;
-      int start = this->boards_[row][col];
-      if (start == 0) break;
-      auto current_col = col;
-      int same_index = -1;
-      while (current_col < this->size_ - (this->same_count - 1)) {
-        for (int i = 1; i <= this->same_count - 1; ++i) {
-          if (start != this->boards_[row][current_col + i]) {
-            still_same = false;
-            break;
+  int counts = 1;
+  if (this->one_more_counts)
+    counts = 2;
+  for (int count = 1; count <= counts; ++count) {
+    this->clear_blank();
+    for (size_type row = 0; row < this->size_; ++row) {
+      for (size_type col = 0; col < this->size_ - (this->same_count - 1);
+           ++col) {
+        bool still_same = true;
+        int start = this->boards_[row][col];
+        if (start == 0) break;
+        auto current_col = col;
+        int same_index = -1;
+        while (current_col < this->size_ - (this->same_count - 1)) {
+          for (int i = 1; i <= this->same_count - 1; ++i) {
+            if (start != this->boards_[row][current_col + i]) {
+              still_same = false;
+              break;
+            }
           }
+          if (!still_same) break;
+          ++current_col;
+          same_index = current_col;
         }
-        if (!still_same) break;
-        ++current_col;
-        same_index = current_col;
+        if (same_index == -1 || start == -1) continue;
+        if (this->score_resulted) {
+          this->scores += pow(this->same_count, ++this->boards_[row][col]);
+        } else {
+          ++this->boards_[row][col];
+        }
+        for (int i = 0; i < this->same_count - 1; ++i)
+          this->boards_[row][same_index + i] = 0;
       }
-      if (same_index == -1 || start == -1) continue;
-      if (this->score_resulted) {
-        this->scores += pow((++this->boards_[row][col]), this->same_count);
-      } else {
-        ++this->boards_[row][col];
-      }
-      for (int i = 0; i < this->same_count - 1; ++i)
-        this->boards_[row][same_index + i] = 0;
     }
+    this->clear_blank();
   }
-  this->clear_blank();
 }
 
 void Board::move_right() {

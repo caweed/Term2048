@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
   bool reversed = false;
   int mode = 2;
   bool difficult_mode = false;
+  bool one_more_counts = false;
   int difficult_mode_number;
   if (argc > 1) {
     for (int i = 1; i < argc; ++i) {
@@ -74,6 +75,7 @@ int main(int argc, char *argv[]) {
     try {
       cout << "请输入行数(方块阶数)：";
       cin >> row;
+      if (row > 5) one_more_counts = true;
       cout << "请输入每次能相消的相同方块块数(2 or 3): ";
       cin >> mode;
       cout << "是否反转模式(控制反转)？(1 -> 是，0 -> 否) :";
@@ -86,6 +88,7 @@ int main(int argc, char *argv[]) {
   }
   Board board(row, difficult_mode, difficult_mode_number);
   board.set_game_same_count(mode);
+  board.set_one_more_counts(one_more_counts);
   if (mode == 3)
     board.set_game_boards(mode_3_game_board);
   else
