@@ -1,6 +1,6 @@
+
 #ifndef TERM2048_BOARD_H
 #define TERM2048_BOARD_H
-
 #include <ncurses.h>
 #include <unistd.h>
 #include <algorithm>
@@ -13,7 +13,6 @@
 #include <map>
 #include <string>
 #include <vector>
-
 #define BLACK 7
 #define RED 1
 #define YELLOW 2
@@ -21,34 +20,30 @@
 #define CYAN 4
 #define BLUE 5
 #define MAGENTA 6
-
-static int colors[7] = {BLACK, RED, YELLOW, GREEN, CYAN, BLUE, MAGENTA};
-static std::string happys[] = {"(-_-)", "(T_T)", "(^_^)", "(^o^)", "(^.^)"};
+static int colors[7] = { BLACK, RED, YELLOW, GREEN, CYAN, BLUE, MAGENTA };
+static std::string happys[] = { "(-_-)", "(T_T)", "(^_^)", "(^o^)", "(^.^)" }; // ?????
 
 class Board {
- public:
-  typedef std::vector<std::string>::size_type size_type;
+public:
+  typedef std::vector < std::string >::size_type size_type;
 
- public:
+public:
   explicit Board(size_type size = 4, bool dm = false, int dm_number = 0)
-      : size_(size),
-        scores(0),
-        same_count(2),
-        difficult_mode(dm),
-        difficult_number(dm_number) {
+:  
+  size_(size),
+  scores(0), same_count(2), difficult_mode(dm), difficult_number(dm_number) {
     this->init();
     this->add();
     this->add();
-  }
-
-  explicit Board(const std::string &filename) {
+  } explicit Board(const std::string & filename) {
     this->init();
     this->resume(filename);
   }
 
-  ~Board() {}
+  ~Board() {
+  }
 
- public:
+public:
   void move_right();
   void move_left();
   void move_up();
@@ -57,32 +52,40 @@ class Board {
   void draw();
   void loop();
   void restart();
-  void set_one_more_counts(bool c) { this->one_more_counts = c; }
-  void set_reversed(bool r) { this->reversed = r; }
-  void set_game_same_count(int count) { this->same_count = count; }
-  void set_difficult_mode(bool d) { this->difficult_mode = d; }
+  void set_one_more_counts(bool c) {
+    this->one_more_counts = c;
+  }
+  void set_reversed(bool r) {
+    this->reversed = r;
+  }
+  void set_game_same_count(int count) {
+    this->same_count = count;
+  }
+  void set_difficult_mode(bool d) {
+    this->difficult_mode = d;
+  }
   void set_keys(int u, int d, int l, int r) {
     this->up = u;
     this->down = d;
     this->left = l;
     this->right = r;
   }
-  void set_game_boards(const std::vector<std::string> &b) {
+  void set_game_boards(const std::vector < std::string > &b) {
     this->s_values.assign(b.begin(), b.end());
     for (size_type i = 0; i < this->s_values.size(); ++i) {
       this->map_values_[i] = this->s_values[i];
     }
   }
 
- protected:
-  std::map<int, std::string> map_values_;
-  std::vector<int> indexs_;
-  std::vector<std::vector<int>> boards_;
+protected:
+  std::map < int, std::string > map_values_;
+  std::vector < int >indexs_;
+  std::vector < std::vector < int >>boards_;
   size_type size_;
   int same_count;
   int scores;
 
- private:
+private:
   void init() {
     initscr();
     noecho();
@@ -97,18 +100,19 @@ class Board {
     init_pair(6, COLOR_WHITE, COLOR_MAGENTA);
     init_pair(7, COLOR_WHITE, COLOR_BLACK);
     init_pair(8, COLOR_CYAN, COLOR_BLACK);
-    this->s_values = {"0",    "1",    "3",     "9",     "27",    "81",
-                      "243",  "729",  "2187",  "6561",  "19683", "59049",
-                      "177k", "531k", "1594k", "4782k", "Inf"};
+    this->s_values = {
+    "0", "1", "3", "9", "27", "81",
+        "243", "729", "2187", "6561", "19683", "59049",
+        "177k", "531k", "1594k", "4782k", "Inf"};
 
     std::fill_n(std::back_inserter(indexs_), this->size_ * this->size_, 0);
     for (size_type i = 0; i < this->indexs_.size(); ++i) {
-      this->map_values_.insert(std::make_pair(
-          i, i < this->s_values.size() ? this->s_values[i]
-                                       : *(this->s_values.rbegin())));
+      this->map_values_.
+        insert(std::make_pair(i, i < this->s_values.size()? this->s_values[i]
+                              : *(this->s_values.rbegin())));
     }
-    std::vector<std::vector<int>> board(this->size_,
-                                        std::vector<int>(this->size_));
+    std::vector < std::vector < int >>board(this->size_,
+                                            std::vector < int >(this->size_));
     this->boards_.assign(board.begin(), board.end());
     this->score_resulted = true;
     this->reversed = false;
@@ -121,7 +125,7 @@ class Board {
     refresh();
   }
 
- public:
+public:
   void clear_blank();
   void rotate_right();
   void rotate_left();
@@ -132,20 +136,20 @@ class Board {
   void save(const std::string &, bool showed = true);
   void resume(const std::string &);
 
- private:
+private:
   bool score_resulted;
   bool reversed;
   bool one_more_counts;
   bool difficult_mode;
   int difficult_number;
   int difficult_mode_row, difficult_mode_col;
-  std::vector<std::string> s_values;
+  std::vector < std::string > s_values;
   int up, down, right, left;
 };
 
 void Board::add() {
   static bool initialized = false;
-  int grids[11] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2};
+  int grids[11] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2 };
 
   if (!initialized) {
     srand(time(0));
@@ -196,46 +200,49 @@ void Board::draw() {
         continue;
       }
       switch (value) {
-        case 7:
-          color = colors[1];
-          break;
-        case 8:
-          color = colors[2];
-          break;
-        case 9:
-          color = colors[3];
-          break;
-        case 10:
-          color = colors[4];
-          break;
-        case 11:
-          color = colors[5];
-          break;
-        case 12:
-          color = colors[6];
-          break;
-        case 13:
-          color = colors[1];
-          break;
-        case 14:
-          color = colors[2];
-          break;
-        case 15:
-          color = colors[3];
-          break;
-        default:
-          color = colors[value];
-          break;
+      case 7:
+        color = colors[1];
+        break;
+      case 8:
+        color = colors[2];
+        break;
+      case 9:
+        color = colors[3];
+        break;
+      case 10:
+        color = colors[4];
+        break;
+      case 11:
+        color = colors[5];
+        break;
+      case 12:
+        color = colors[6];
+        break;
+      case 13:
+        color = colors[1];
+        break;
+      case 14:
+        color = colors[2];
+        break;
+      case 15:
+        color = colors[3];
+        break;
+      default:
+        color = colors[value];
+        break;
       }
       attron(COLOR_PAIR(color));
-      if (value > 6 && value < 13) attron(A_BOLD);
+      if (value > 6 && value < 13)
+        attron(A_BOLD);
       mvprintw(start_x, start_y, "       ");
       mvprintw(start_x + 1, start_y, "       ");
       mvprintw(start_x + 2, start_y, "       ");
       mvprintw(start_x + 1, position, "%s", this->map_values_[value].c_str());
-      if (value == 0) mvprintw(start_x + 1, position, "-");
+      if (value == 0)
+        mvprintw(start_x + 1, position, "-");
       attroff(COLOR_PAIR(color));
-      if (value > 6 && value < 13) attroff(A_BOLD);
+      if (value > 6 && value < 13)
+        attroff(A_BOLD);
     }
   }
   mvprintw(1, 3, "Scores: %8d", this->scores);
@@ -249,51 +256,52 @@ void Board::loop() {
   while ((key = getch()) != 'q') {
     auto before_boards = this->boards_;
     switch (key) {
-      case '2':
-        if (!this->reversed)
-          this->move_up();
-        else
-          this->move_down();
-        break;
-      case '4':
-        if (!this->reversed)
-          this->move_left();
-        else
-          this->move_right();
-        break;
-      case '6':
-        if (!this->reversed)
-          this->move_right();
-        else
-          this->move_left();
-        break;
-      case '8':
-        if (!this->reversed)
-          this->move_down();
-        else
-          this->move_up();
-        break;
-      case 'n':
-      game_restart:
-        this->restart();
-        quit_but_result = false;
-        break;
-      case 's':
-        this->save("/data/data/com.lonelyweed.term2048/files/Data");
-        quit_but_result = true;
-        break;
-      case 'r':
-        this->resume("/data/data/com.lonelyweed.term2048/files/Data");
-        quit_but_result = true;
-        goto game_resume;
-        break;
-      default:
-        break;
+    case '2':
+      if (!this->reversed)
+        this->move_up();
+      else
+        this->move_down();
+      break;
+    case '4':
+      if (!this->reversed)
+        this->move_left();
+      else
+        this->move_right();
+      break;
+    case '6':
+      if (!this->reversed)
+        this->move_right();
+      else
+        this->move_left();
+      break;
+    case '8':
+      if (!this->reversed)
+        this->move_down();
+      else
+        this->move_up();
+      break;
+    case 'n':
+    game_restart:
+      this->restart();
+      quit_but_result = false;
+      break;
+    case 's':
+      this->save("/data/data/com.lonelyweed.term2048/files/Data");
+      quit_but_result = true;
+      break;
+    case 'r':
+      this->resume("/data/data/com.lonelyweed.term2048/files/Data");
+      quit_but_result = true;
+      goto game_resume;
+      break;
+    default:
+      break;
     }
     if (this->boards_ != before_boards) {
       this->draw();
       usleep(150000);
       this->add();
+      if (this->size_ >= 6) this->add();
       this->draw();
       if (quit_but_result)
         this->save("/data/data/com.lonelyweed.term2048/files/Data", false);
@@ -316,8 +324,8 @@ void Board::loop() {
 }
 
 void Board::restart() {
-  for (auto &rows : this->boards_) {
-    for (auto &col : rows) {
+for (auto & rows:this->boards_) {
+  for (auto & col:rows) {
       col = 0;
     }
   }
@@ -341,10 +349,11 @@ void Board::restart() {
 
 bool Board::finished() {
   this->score_resulted = false;
-  auto filled = [&]() -> bool {
-    for (auto &rows : this->boards_)
-      for (auto &col : rows)
-        if (col == 0) return false;
+  auto filled =[&]()->bool {
+  for (auto & rows:this->boards_)
+    for (auto & col:rows)
+        if (col == 0)
+          return false;
     return true;
   };
   auto backup = this->boards_;
@@ -410,7 +419,8 @@ void Board::move_left() {
            ++col) {
         bool still_same = true;
         int start = this->boards_[row][col];
-        if (start == 0) break;
+        if (start == 0)
+          break;
         auto current_col = col;
         int same_index = -1;
         while (current_col < this->size_ - (this->same_count - 1)) {
@@ -420,11 +430,13 @@ void Board::move_left() {
               break;
             }
           }
-          if (!still_same) break;
+          if (!still_same)
+            break;
           ++current_col;
           same_index = current_col;
         }
-        if (same_index == -1 || start == -1) continue;
+        if (same_index == -1 || start == -1)
+          continue;
         if (this->score_resulted) {
           this->scores += pow(this->same_count, ++this->boards_[row][col]);
         } else {
@@ -456,37 +468,38 @@ void Board::move_down() {
   this->rotate_vertical();
 }
 
-void Board::save(const std::string &filename, bool showed) {
+void Board::save(const std::string & filename, bool showed) {
   std::fstream os(filename, std::fstream::out);
   os << std::string(20, '=') << "\n";
   os << "Best " << this->same_count << " "
-     << "Scores " << this->scores << " "
-     << "Size " << this->size_ << "\n";
+    << "Scores " << this->scores << " " << "Size " << this->size_ << "\n";
   os << "Boards ";
-  for (auto &rows : this->boards_) {
-    for (auto &col : rows) {
+for (auto & rows:this->boards_) {
+  for (auto & col:rows) {
       os << col << " ";
     }
   }
   os << "\n";
   os << "Values ";
-  for (auto &value : this->map_values_) {
+for (auto & value:this->map_values_) {
     os << value.second << " ";
   }
   os << "\n";
   os.close();
-  if (showed) mvprintw(0, 0, "Saved Successfully");
+  if (showed)
+    mvprintw(0, 0, "Saved Successfully");
   refresh();
 }
 
-void Board::resume(const std::string &filename) {
+void Board::resume(const std::string & filename) {
   auto size = this->size_;
   auto count = this->same_count;
   std::fstream is(filename, std::fstream::in);
   std::string temp;
   int score = this->scores;
   std::getline(is, temp);
-  is >> temp >> this->same_count >> temp >> this->scores >> temp >> this->size_;
+  is >> temp >> this->same_count >> temp >> this->scores >> temp >> this->
+    size_;
   if (size != this->size_) {
     mvprintw(0, 0, "current row or col is %d, but the saved is %d", size,
              this->size_);
@@ -503,14 +516,15 @@ void Board::resume(const std::string &filename) {
     return;
   }
   is >> temp;
-  for (auto &rows : this->boards_) {
-    for (auto &col : rows) {
+for (auto & rows:this->boards_) {
+  for (auto & col:rows) {
       is >> col;
     }
   }
   is >> temp;
   this->s_values.clear();
-  for (auto &value : this->s_values) is >> value;
+for (auto & value:this->s_values)
+    is >> value;
   is.close();
   this->draw();
 }
